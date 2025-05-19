@@ -36,7 +36,12 @@ stderr_redirector = OutputRedirector(sys.stderr)
 
 class _TestResult(TestResult):
     """测试结果"""
-
+    def calculate_passrate(self):
+        total_count = self.success_count + self.failure_count + self.error_count + self.skip_count
+        if total_count > 0:
+            self.passrate = (self.success_count / total_count) * 100
+        else:
+            self.passrate = 0
     def __init__(self):
         TestResult.__init__(self)
         self.stdout0 = None
@@ -181,7 +186,9 @@ class HTMLTestReport(object):
         result = _TestResult()
         test(result)
         self.stopTime = datetime.datetime.now()
+        result.calculate_passrate()
         self.generateReport(test, result)
+        file.write(f"通过率: {result.passrate}%\n")
         print('\nTime Elapsed: %s' % (self.stopTime - self.startTime), file=sys.stderr)
         return result
 
@@ -231,6 +238,12 @@ class HTMLTestReport(object):
 
         with open(self.file_path, 'wb') as f:
             f.write(output.encode('utf8'))
+            def generateReport(self, test, result):
+    # 已有代码...
+    with open(self.file_path, 'wb') as f:
+        f.write(f"通过率: {result.passrate}%\n".encode('utf8'))  # 添加这行展示通过率，注意编码
+        f.write(output.encode('utf8'))
+        
 
     def _generate_stylesheet(self):
         return Template.STYLESHEET_TMPL
